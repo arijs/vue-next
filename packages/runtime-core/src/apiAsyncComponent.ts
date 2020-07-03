@@ -7,6 +7,10 @@ import {
 } from './component'
 import { isFunction, isObject } from '@vue/shared'
 import { ComponentPublicInstance } from './componentProxy'
+import {
+  LazyComponentResolver,
+  LazyDirectiveResolver
+} from './componentOptions'
 import { createVNode } from './vnode'
 import { defineComponent } from './apiDefineComponent'
 import { warn } from './warning'
@@ -34,6 +38,8 @@ export interface AsyncComponentOptions<T = any> {
     fail: () => void,
     attempts: number
   ) => any
+  getComponent?: LazyComponentResolver
+  getDirective?: LazyDirectiveResolver
 }
 
 export function defineAsyncComponent<
@@ -50,7 +56,9 @@ export function defineAsyncComponent<
     delay = 200,
     timeout, // undefined = never times out
     suspensible = true,
-    onError: userOnError
+    onError: userOnError,
+    getComponent,
+    getDirective
   } = source
 
   let pendingRequest: Promise<Component> | null = null
@@ -109,6 +117,8 @@ export function defineAsyncComponent<
   return defineComponent({
     __asyncLoader: load,
     name: 'AsyncComponentWrapper',
+    getComponent,
+    getDirective,
     setup() {
       const instance = currentInstance!
 
